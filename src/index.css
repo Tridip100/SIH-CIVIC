@@ -1,0 +1,9 @@
+@import "tailwindcss";
+body {
+    background-image: url("https://i.pinimg.com/1200x/f4/bf/ba/f4bfbaf8c9742111b7edb7e0786e3361.jpg");
+    background-size: cover;      
+    background-repeat: no-repeat;
+    background-attachment: fixed; 
+    background-position: center;
+  }
+  
