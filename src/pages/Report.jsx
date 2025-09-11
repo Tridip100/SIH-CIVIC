@@ -1,70 +1,88 @@
-import { useGSAP } from "@gsap/react";
+import { useEffect, useContext, useRef } from "react";
 import gsap from "gsap";
+import { translation } from "../translation.js";
+import { LanguageContext } from "../LanguageContext.jsx";
 
 export default function Report() {
-  useGSAP(() => {
-    gsap.from(".report-form input, .report-form select, .report-form textarea, .report-form button", {
-      opacity: 0,
-      y: 30,
-      stagger: 0.2,
-      duration: 0.8,
-      ease: "power3.out",
-    });
+  const { lang } = useContext(LanguageContext);
 
-    gsap.from(".report-image", {
-      opacity: 0,
-      x: -50,
-      duration: 1.2,
-      ease: "power3.out",
-    });
-  });
+  // ✅ fallback to English
+  const t = translation[lang]?.["/report"] || translation.en["/report"];
+
+  const formRef = useRef(null);
+  const imageRef = useRef(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (formRef.current) {
+        gsap.fromTo(
+          formRef.current.children,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: "power3.out" }
+        );
+      }
+
+      if (imageRef.current) {
+        gsap.fromTo(
+          imageRef.current,
+          { opacity: 0, x: -50 },
+          { opacity: 1, x: 0, duration: 1.2, ease: "power3.out" }
+        );
+      }
+    }, 100);
+  }, []);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-center">
-      
-      <div className="report-image flex-1 hidden md:block">
+    <div className="p-6 max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-start">
+      {/* Illustration */}
+      <div ref={imageRef} className="report-image flex-1 hidden md:block">
         <img
-          src="https://i.pinimg.com/1200x/80/f3/96/80f3960217c48c2f1a8eda45ff5da35b.jpg" 
+          src="https://i.pinimg.com/1200x/80/f3/96/80f3960217c48c2f1a8eda45ff5da35b.jpg"
           alt="Report Issue Illustration"
           className="rounded-2xl shadow-lg object-cover w-full h-[400px]"
         />
       </div>
 
-      
-      <div className="flex-1">
+      {/* Form */}
+      <div className="flex-1 w-full">
         <h2 className="text-3xl font-bold mb-6 text-center md:text-left">
-          📝 Report an Issue
+          {t.title}
         </h2>
-        <form className="report-form space-y-4">
+        <form ref={formRef} className="report-form space-y-4">
           <input
             type="text"
-            placeholder="Issue Title"
-            className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400"
+            placeholder={t.placeholders.title}
+            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-400 outline-none"
           />
-          <select className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400">
-            <option>Select Category</option>
-            <option>🚧 Roads</option>
-            <option>💡 Streetlights</option>
-            <option>🗑️ Garbage</option>
-            <option>💧 Water Supply</option>
-            <option>Other</option>
+          <select className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-400 outline-none">
+            <option disabled selected>
+              {t.placeholders.category}
+            </option>
+            <option>{t.placeholders.roads}</option>
+            <option>{t.placeholders.streetlights}</option>
+            <option>{t.placeholders.garbage}</option>
+            <option>{t.placeholders.water}</option>
+            <option>{t.placeholders.other}</option>
           </select>
           <textarea
-            placeholder="Describe the issue..."
+            placeholder={t.placeholders.description}
             rows="4"
-            className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400"
+            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-400 outline-none"
           ></textarea>
-          <input type="file" className="w-full border rounded-lg p-2" />
+          <input
+            type="file"
+            className="w-full border rounded-lg p-3 outline-none"
+          />
           <input
             type="text"
-            placeholder="Location (Auto-detect in future)"
-            className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400"
+            placeholder={t.placeholders.location}
+            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-400 outline-none"
           />
           <button
             type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transform hover:scale-105 transition-transform duration-200"
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transform hover:scale-105 transition-transform duration-200"
           >
-            Submit Issue
+            {t.button}
           </button>
         </form>
       </div>

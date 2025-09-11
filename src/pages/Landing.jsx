@@ -1,197 +1,183 @@
-import { useGSAP } from "@gsap/react";
+import { useContext, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { LanguageContext } from "../LanguageContext.jsx"; 
+import { translation } from "../translation.js";
+
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/all";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+function Landing() {
+  const { lang } = useContext(LanguageContext);
+  const wrapperRef = useRef(null);
+  const triggerRef = useRef(null);
 
-export default function Landing() {
   const sections = [
     {
       image:
-        "https://i.pinimg.com/736x/05/60/5a/05605a78b51bf5255af4b7514a1bfa99.jpg",
-      title: " Report an Issue",
+        "https://i.pinimg.com/736x/f1/af/1e/f1af1e7d7dc9a6471ee6b75f835ebeba.jpg",
+      title: translation[lang]?.["/"]?.report || "Report Issue",
       link: "/report",
-      layout: "hero",
     },
     {
       image:
-        "https://i.pinimg.com/originals/10/58/c9/1058c9f739ea6feebdb361cb138bea6e.gif",
-      title: "Chatbot",
+        "https://i.pinimg.com/1200x/b4/4b/f0/b44bf09200a0a91b021f57eb75af92af.jpg",
+      title: translation[lang]?.["/"]?.chatbot || "Chatbot",
       link: "/chatbot",
-      layout: "half",
     },
     {
       image:
-        "https://videocdn.pollo.ai/web-cdn/pollo/production/cmf9a7s2q027bn7by48yr1arf/image/1757224754419-22ee636e-c157-40fc-af74-bba3d6c1005a.jpeg",
-      title: "Image Recognition",
+        "https://i.pinimg.com/1200x/86/22/ee/8622ee9686941e43ea39e408448476d7.jpg",
+      title: translation[lang]?.["/"]?.imageRecognition || "Image Recognition",
       link: "/image",
-      layout: "half",
     },
     {
       image:
-        "https://i.pinimg.com/736x/64/e4/f6/64e4f60cf2019ad7fb7d44e2bed405ca.jpg",
-      title: "Track Issues",
+        "https://i.pinimg.com/1200x/27/9a/3e/279a3ee6efff66cad7e3c53fcc972b65.jpg",
+      title: translation[lang]?.["/"]?.tracker || "Admin", // ✅ fixed key
       link: "/tracker",
-      layout: "third",
     },
     {
       image:
-        "https://i.pinimg.com/1200x/e7/0c/28/e70c2855fcaa37402c96ea1d02411740.jpg",
-      title: "Map",
+        "https://i.pinimg.com/1200x/45/c2/27/45c227b3bfc9750377d127e2bed1fea1.jpg",
+      title: translation[lang]?.["/"]?.map || "Map",
       link: "/map",
-      layout: "third",
     },
     {
       image:
-        "https://i.pinimg.com/1200x/96/ee/02/96ee02b9a4af3df81faf0c3034bba03c.jpg",
-      title: "Contact",
+        "https://i.pinimg.com/736x/61/c3/7e/61c37ee64436d972c83d889f7c129992.jpg",
+      title: translation[lang]?.["/"]?.contact || "Contact",
       link: "/contact",
-      layout: "third",
     },
     {
       image:
         "https://i.pinimg.com/1200x/03/f8/02/03f802b629283e7ea6810def824bb28e.jpg",
-      title: " About Platform",
+      title: translation[lang]?.["/"]?.about || "About",
       link: "/about",
-      layout: "full",
     },
   ];
 
-  gsap.registerPlugin(ScrollTrigger);
+   useEffect(() => {
+    // ensure ScrollTrigger registered
+    gsap.registerPlugin(ScrollTrigger);
 
-  useGSAP(() => {
-    // Animate hero card
-    gsap.from(".landing-hero", {
-      opacity: 0,
-      y: 100,
-      duration: 1.2,
-      scrollTrigger: {
-        trigger: ".landing-wrapper",
-        start: "top 80%",
-        toggleActions: "restart none none reset",
-      },
-    });
+    // scope selectors to this component using wrapperRef
+    const ctx = gsap.context(() => {
+      // use immediateRender:false so GSAP doesn't force initial inline styles before render
+      gsap.from(".landing-card", {
+        opacity: 0,
+        y: 100,
+        duration: 1.2,
+        stagger: 0.2,
+        ease: "power3.out",
+        immediateRender: false,
+        scrollTrigger: {
+          trigger: triggerRef.current,
+          start: "top 80%",
+          // don't persist weird pinned or scrub state
+          markers: false,
+        },
+      });
 
-    // Animate row of 2 half cards
-    gsap.from(".landing-half-row", {
-      opacity: 0,
-      y: 100,
-      duration: 1.2,
-      scrollTrigger: {
-        trigger: ".landing-half-row",
-        start: "top 80%",
-        toggleActions: "restart none none reset",
-      },
-    });
+      // ensure ScrollTrigger calculates positions after paint
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+      });
+    }, wrapperRef);
 
-    // Animate row of 3 cards
-    gsap.from(".landing-row", {
-      opacity: 0,
-      y: 100,
-      duration: 1.2,
-      scrollTrigger: {
-        trigger: ".landing-row",
-        start: "top 80%",
-        toggleActions: "restart none none reset",
-      },
-    });
+    // cleanup: kill animations and revert any inline styles GSAP set
+    return () => {
+      ctx.revert(); // kills timelines/ScrollTrigger created inside context and clears inline styles
+      ScrollTrigger.getAll().forEach((st) => st.kill && st.kill());
+    };
+  }, []);
 
-    // Animate about card
-    gsap.from(".landing-about", {
-      opacity: 0,
-      y: 80,
-      scale: 0.95,
-      duration: 1.5,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ".landing-about",
-        start: "top 85%",
-        end: "bottom 70%",
-        scrub: true,
-      },
-    });
-  });
 
   return (
-    <div className="landing-wrapper h-full w-full p-0 m-0">
-      {/* HERO (Report Issue) */}
-      <a
-        href={sections[0].link}
-        className="landing-hero hover:rounded-4xl landing-card group relative block w-full h-[70vh] overflow-hidden"
+    <div
+      ref={wrapperRef}
+      className="landing-wrapper min-h-screen w-full"
+    >
+      {/* HERO */}
+      <Link
+        to={sections[0].link}
+        className="landing-card group relative block w-full h-[70vh] overflow-hidden"
       >
         <img
           src={sections[0].image}
           alt={sections[0].title}
-          className="w-full h-full overflow-hidden object-cover group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
-        <div className="absolute inset-0 transition-all hover:bg-red-400/50 flex items-center justify-center">
-          <h2 className="text-5xl font-extrabold text-white group-hover:text-green-400 transition-colors">
+        <div className="absolute inset-0 bg-black/20 hover:bg-orange-300/80 flex items-center justify-center transition-colors">
+          <h2 className="text-5xl font-extrabold text-yellow-300 group-hover:text-white transition-colors">
             {sections[0].title}
           </h2>
         </div>
-      </a>
+      </Link>
 
-      <div className="p-10 flex flex-col gap-6">
-        {/* Chatbot + Image Recognition (half-half row) */}
-        <div className="landing-half-row flex gap-6 flex-wrap justify-between">
+      <div ref={triggerRef} className="p-10 space-y-10">
+        {/* 2-COLUMN GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sections.slice(1, 3).map((sec, idx) => (
-            <a
+            <Link
               key={idx}
-              href={sec.link}
-              className="landing-card group relative block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 flex-1 min-w-[250px] max-w-[49%]"
+              to={sec.link}
+              className="landing-card group relative block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
             >
               <img
                 src={sec.image}
                 alt={sec.title}
                 className="w-full h-60 object-cover group-hover:scale-110 transition-transform duration-500"
               />
-              <div className="absolute inset-0 hover:bg-purple-400/70 flex items-center justify-center">
-                <h2 className="text-2xl font-bold text-white group-hover:text-yellow-300 transition-colors">
+              <div className="absolute inset-0 bg-black/20 hover:bg-orange-400/60 flex items-center justify-center transition-colors">
+                <h2 className="text-2xl font-bold text-yellow-300 group-hover:text-white transition-colors">
                   {sec.title}
                 </h2>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
 
-        {/* Track + Map + Contact (3 in same row) */}
-        <div className="landing-row flex gap-6 flex-wrap justify-between">
+        {/* 3-COLUMN GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {sections.slice(3, 6).map((sec, idx) => (
-            <a
+            <Link
               key={idx}
-              href={sec.link}
-              className="landing-card group relative block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 flex-1 min-w-[250px] max-w-[32%]"
+              to={sec.link}
+              className="landing-card group relative block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
             >
               <img
                 src={sec.image}
                 alt={sec.title}
                 className="w-full h-60 object-cover group-hover:scale-110 transition-transform duration-500"
               />
-              <div className="absolute inset-0 hover:bg-lime-300/80 flex items-center justify-center">
-                <h2 className="text-xl font-bold text-white group-hover:text-rose-400 transition-colors">
+              <div className="absolute inset-0 bg-black/20 hover:bg-orange-400/60 flex items-center justify-center transition-colors">
+                <h2 className="text-xl font-bold text-yellow-300 group-hover:text-white transition-colors">
                   {sec.title}
                 </h2>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
 
-        {/* About (Full Width) */}
-        <a
-          href={sections[6].link} 
-          className="landing-about landing-card group relative rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-400 w-full"
+        {/* FULL WIDTH */}
+        <Link
+          to={sections[6].link}
+          className="landing-card group relative block rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-400 w-full"
         >
           <img
             src={sections[6].image}
             alt={sections[6].title}
             className="w-full h-60 object-cover group-hover:scale-110 transition-transform duration-500"
           />
-          <div className="absolute inset-0 hover:bg-green-300/50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/20 hover:bg-green-300/50 flex items-center justify-center transition-colors">
             <h2 className="text-2xl font-bold text-white group-hover:text-blue-500 transition-colors">
               {sections[6].title}
             </h2>
           </div>
-        </a>
+        </Link>
       </div>
     </div>
   );
 }
+
+export default Landing;
